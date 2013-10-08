@@ -1,29 +1,3 @@
-////////////////////////////////////////////////////////////////////////////
-//
-//  This file is part of MPU9150Lib
-//
-//  Copyright (c) 2013 Pansenti, LLC
-//
-//  Permission is hereby granted, free of charge, to any person obtaining a copy of 
-//  this software and associated documentation files (the "Software"), to deal in 
-//  the Software without restriction, including without limitation the rights to use, 
-//  copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the 
-//  Software, and to permit persons to whom the Software is furnished to do so, 
-//  subject to the following conditions:
-//
-//  The above copyright notice and this permission notice shall be included in all 
-//  copies or substantial portions of the Software.
-//
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-//  INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-//  PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
-//  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
-//  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
-//  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-//  This example sketch shows how to calculate residual accelerations in the body frame,
-//  compensated for gravity.
-
 #include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU9150Lib.h"
@@ -32,10 +6,10 @@
 #include <dmpmap.h>
 #include <inv_mpu.h>
 #include <inv_mpu_dmp_motion_driver.h>
+#include <EEPROM.h>
+#include "QSLib.h"
 
 //#define DEMO_DEBUG 1
-
-#include <EEPROM.h>
 
 MPU9150Lib MPU;                                              // the MPU object
 
@@ -68,9 +42,12 @@ MPU9150Lib MPU;                                              // the MPU object
 MPUQuaternion gravity;  // this is our earth frame gravity vector                 
 
 int counter = 0;
+int counter_speed = 50;
 #define MY_SENSOR_RANGE2 32767.0
 #define  DEVICE_TO_CALIBRATE    0
 #define MAX_G_FLOAT MAX_G * 1.0
+
+QSLib qsLib(&Serial1, (HardwareSerial *)&Serial);
 
 void setup()
 {
@@ -118,17 +95,13 @@ void loop()
     result[VEC3_Y] = -(MPU.m_calAccel[VEC3_Y] - gravity[VEC3_Y]);
     result[VEC3_Z] = -(MPU.m_calAccel[VEC3_Z] - gravity[VEC3_Z]);
     
+    //qsLib.sendAcceleration(result);
+    
     counter++;
-    if (counter % 100 == 0) {
+    if (counter % counter_speed == 0) {
       counter = 0;
       //MPU.printVector(result);      // print the residual accelerations
-      Serial.print(result[VEC3_X]);
-      Serial1.print(result[VEC3_X]);
-      Serial.println("");
-      Serial.println(sizeof(short));
-      Serial.println(sizeof(int));
-      Serial.println(sizeof(long));
-      Serial.println(sizeof(float));
+      qsLib.sendAcceleration(result);
       #ifdef DEMO_DEBUG
         Serial.print("  Cal Accel: ");
         MPU.printVector(MPU.m_calAccel);                               // print the residual accelerations
