@@ -36,7 +36,7 @@ extern long g_accel_scalar;
 
 //  Define this symbol to get debug info
 
-#define MPULIB_DEBUG
+//#define MPULIB_DEBUG
 
 //  This symbol defines the scaled range for mag and accel values
 

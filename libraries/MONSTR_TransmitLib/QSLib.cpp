@@ -63,7 +63,9 @@ uint8_t QSLib::floatToHex(float float_number, uint8_t *buf, uint8_t bufLen) {
 char QSLib::mod16ToHex(int16_t i) {
 
   if(i > 15 || i < 0) {
-      outputSerial->println("Bad value passed to mod16ToHex");
+      #ifdef DEBUG
+        outputSerial->println("Bad value passed to mod16ToHex");  
+      #endif
       return 'X';
   }
   if(i < 10) {
@@ -75,7 +77,9 @@ char QSLib::mod16ToHex(int16_t i) {
 /* Returns 'X' on failure, valid hex char otherwise */
 char QSLib::add8ToHex(char c) {
   if(!(c >= '0' && c <= '7')) {
-    outputSerial->println("Bad value passed to add8ToHex");
+    #ifdef DEBUG
+      outputSerial->println("Bad value passed to add8ToHex");
+    #endif
     return 'X';
   } else if(c == '0' || c == '1') {
     return c + 8;
@@ -116,7 +120,9 @@ uint8_t QSLib::sendPacket(const char packetType, const void *const data) {
     default:
       packetFieldLength = 0;
       packetFieldCount = 0;
-      outputSerial->println("Error, invalid packetType received in sendPacket!");
+      #ifdef DEBUG
+        outputSerial->println("Error, invalid packetType received in sendPacket!");
+      #endif
       return ERROR_SENDPACKET_INVALID_PACKET_TYPE;
       break;
   }

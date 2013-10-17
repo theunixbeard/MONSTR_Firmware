@@ -42,21 +42,69 @@ MPU9150Lib MPU;                                              // the MPU object
 MPUQuaternion gravity;  // this is our earth frame gravity vector                 
 
 int counter = 0;
-int counter_speed = 50;
+int counter_speed = 2000;
 #define MY_SENSOR_RANGE2 32767.0
 #define  DEVICE_TO_CALIBRATE    0
 #define MAX_G_FLOAT MAX_G * 1.0
 
+int led = 13;
+
 QSLib qsLib(&Serial1, (HardwareSerial *)&Serial);
+
+void callsign() {
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(1000);  
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(2000);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(2000); 
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(4000);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(4000);  
+}
+
+void init_delay() {
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+  delay(500);
+  digitalWrite(led, HIGH);    // turn the LED off by making the voltage LOW
+  delay(500);
+}
 
 void setup()
 {
-  Serial.begin(SERIAL_PORT_SPEED);
+  pinMode(led, OUTPUT); 
+  digitalWrite(led, HIGH);
+  //Serial.begin(SERIAL_PORT_SPEED);
+  //while (!Serial);
   Serial1.begin(9600);
-  Serial.println("Accel9150 starting");
   Wire.begin(); 
   //mpu_set_accel_fsr(8);
   
+  //callsign();
+  init_delay();
 
   // Setup calibration data manually due to Teensy 3 EEPROM erase on program bug
   CALLIB_DATA calData;  
@@ -75,6 +123,8 @@ void setup()
 
 void loop()
 {
+  //Serial.println(counter);
+  digitalWrite(led, HIGH);
   MPUVector3 gravity;  
   MPUVector3 result;
   //////////
@@ -96,29 +146,13 @@ void loop()
     result[VEC3_Z] = -(MPU.m_calAccel[VEC3_Z] - gravity[VEC3_Z]);
     
     //qsLib.sendAcceleration(result);
-    
-    counter++;
-    if (counter % counter_speed == 0) {
-      counter = 0;
-      MPU.printVector(result);      // print the residual accelerations
-      qsLib.sendAcceleration(result);
-      #ifdef DEMO_DEBUG
-        Serial.print("  Cal Accel: ");
-        MPU.printVector(MPU.m_calAccel);                               // print the residual accelerations
-        Serial.print("\n  Raw Accel: ");
-        MPU.printVector(MPU.m_rawAccel);  
-        Serial.print("\n  Gravity:   ");
-        MPU.printVector(gravity); 
-        Serial.print("\n  fsr:   ");
-        unsigned char fsr;
-        mpu_get_accel_fsr(&fsr);
-        Serial.print((float)fsr);
-        Serial.print("\n  1G equals:   ");
-        Serial.print(sqrt(sq(MPU.m_rawAccel[VEC3_X]) + sq(MPU.m_rawAccel[VEC3_Y]) + sq(MPU.m_rawAccel[VEC3_Z])));    
-        Serial.print("\n  accel_scalar:   ");   
-        Serial.println(g_accel_scalar);
-      #endif
-      Serial.println("");
-    }
+  }    
+  counter++;
+  if (counter % counter_speed == 0) {
+    counter = 0;
+    //MPU.printVector(result);      // print the residual accelerations
+    qsLib.sendAcceleration(result);
+    digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
+    delay(1500);
   }
 }

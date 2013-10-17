@@ -13,7 +13,7 @@
  */
 
 // Enable/disable DEBUG print
-#define DEBUG 1
+//#define DEBUG 1
 
 // PacketTypes
 #define ACCEL_PACKET_TYPE 1
