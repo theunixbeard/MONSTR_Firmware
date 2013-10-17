@@ -46,6 +46,7 @@ int counter_speed = 50;
 #define MY_SENSOR_RANGE2 32767.0
 #define  DEVICE_TO_CALIBRATE    0
 #define MAX_G_FLOAT MAX_G * 1.0
+#define SHANGWEN
 
 QSLib qsLib(&Serial1, (HardwareSerial *)&Serial);
 
@@ -67,6 +68,15 @@ void setup()
   calData.accelMaxY = 16510;
   calData.accelMinZ = -18014;                             
   calData.accelMaxZ = 15294;
+#ifdef SHANGWEN
+  calData.magValid = true;
+  calData.magMinX = -150; 
+  calData.magMaxX = 146;
+  calData.magMinY = -115;                              
+  calData.magMaxY = 176;
+  calData.magMinZ = -69;                             
+  calData.magMaxZ = 241;
+#endif
   calLibWrite(DEVICE_TO_CALIBRATE, &calData);
   
   
@@ -79,6 +89,36 @@ void loop()
   MPUVector3 result;
   //////////
   if(MPU.read()) {
+#ifdef SHANGWEN
+   MPUQuaternionConjugate(MPU.m_fusedQuaternion, fusedConjugate); 
+   //  rotate the acceleration vector into the earth frame
+      
+   MPUQuaternionMultiply(accel, fusedConjugate, qTemp);
+   MPUQuaternionMultiply(MPU.m_fusedQuaternion, qTemp, ratated_accel);
+   
+   eFrame_accel =  -(ratated_accel[QUAT_Z]-MY_SENSOR_RANGE2 / MAX_G_FLOAT);
+   
+       // Begin velocity calculation//
+   if (eFrame_accel > 300) // start to calculate velocity
+   {
+     velocity += (eFrame_accel/MY_SENSOR_RANGE2*MAX_G_FLOAT*9.8*0.05);
+   }   
+   else
+   {
+     if (velocity > 0.5)
+     {
+       reps++;
+       Serial.print("Velocity: ");
+       Serial.print(velocity);
+       Serial.print("m/s\n");
+       Serial.println("Reps: ");
+       Serial.print(reps);
+       Serial.println("");
+     }     
+     velocity = 0;
+   }   
+    //approximately 50 ms per loop!!!!!!!!!!!!!
+#else
     gravity[VEC3_X] = (2 * (MPU.m_fusedQuaternion[QUAT_X] * MPU.m_fusedQuaternion[QUAT_Z] 
                           - MPU.m_fusedQuaternion[QUAT_W] * MPU.m_fusedQuaternion[QUAT_Y])) 
                           * (MY_SENSOR_RANGE2 / MAX_G_FLOAT);
@@ -94,6 +134,7 @@ void loop()
     result[VEC3_X] = -(MPU.m_calAccel[VEC3_X] - gravity[VEC3_X]);
     result[VEC3_Y] = -(MPU.m_calAccel[VEC3_Y] - gravity[VEC3_Y]);
     result[VEC3_Z] = -(MPU.m_calAccel[VEC3_Z] - gravity[VEC3_Z]);
+ #endif   
     
     //qsLib.sendAcceleration(result);
     
